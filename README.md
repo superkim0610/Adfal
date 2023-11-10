@@ -1,12 +1,12 @@
-#Adfal
+# Adfal
  - AI Based Developer Familiar Language made by Taeyun Kim
 
-##Introduce
+## Introduce
  - Hybrid Language (implemented with compiler, interpreter)
  - AI based on ChatGPT is helping debugging.
 
-##Feature
+## Feature
  - ...
 
-##Development Environment
+## Development Environment
  - ...
