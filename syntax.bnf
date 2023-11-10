@@ -1,0 +1,7 @@
+lc_letter ::= "a"..."z"
+uc_letter ::= "A"..."Z"
+digit ::= "0"..."9"
+
+identifier ::= ("_" | lc_letter | uc_letter) ("_" | lc_letter | uc_letter | digit)*
+
+keword ::= "func" | "return"
