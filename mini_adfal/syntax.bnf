@@ -1,4 +1,6 @@
-identifier ::= ("_" | lc_letter | uc_letter) ("_" | lc_letter | uc_letter | digit)*
+identifier ::= id_start id_continue*
+id_start ::= "_" | lc_letter | uc_letter
+id_continue ::= "_" | lc_letter | uc_letter | digit
 
 keyword ::= "if" | "eles" | "while" | "for" | "continue" | "break" | "func" | "return" | "and" | "or" | "pass"
 
@@ -10,6 +12,6 @@ number_literal ::= integer
 integer ::= digit (digit)*
 digit ::= "0"..."9"
 
-operator ::= "+" | "_" | "*" | "/" | "%" | "<" | ">" | "<=" | ">=" | "==" | "!="
+operator ::= "+" | "-" | "*" | "/" | "%" | "<" | ">" | "<=" | ">=" | "==" | "!="
 
 delimiter ::= "(" | ")" | "[" | "]" | "{" | "}" | "," | "." | "\t"
