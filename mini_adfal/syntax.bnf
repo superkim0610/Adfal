@@ -4,10 +4,9 @@ keyword ::= "if" | "eles" | "while" | "for" | "continue" | "break" | "func" | "r
 
 literal ::= string_literal | number_literal
 string_literal ::= '"' (lc_letter | uc_letter | other_letter)* '"'
-number_literal ::= integer
-
 lc_letter ::= "a"..."z"
 uc_letter ::= "A"..."Z"
+number_literal ::= integer
 integer ::= digit (digit)*
 digit ::= "0"..."9"
 
