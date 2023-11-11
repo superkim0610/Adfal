@@ -133,6 +133,7 @@ def parser(tokens):
     }
 
     while current < len(tokens):
+        print(ast['body'])
         ast.body.append(walk())
 
     return ast
