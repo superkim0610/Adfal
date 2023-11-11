@@ -82,50 +82,52 @@ def tokenizer(input):
     return tokens
 
 def parser(tokens):
+    global current
     current = 0
 
     def walk():
+        global current
         token = tokens[current]
 
         # NumberLiteral
-        if token.type == 'number':
+        if token['type'] == 'number':
             current += 1
 
             return {
                 'type': 'NumberLiteral',
-                'value': token.value,
+                'value': token['value'],
             }
         
         # StringLiteral
-        if token.type == 'string':
+        if token['type'] == 'string':
             current += 1
 
             return { 
                 'type': 'StringLiteral',
-                'value': token.value,
+                'value': token['value'],
             }
         
-        if token.type == 'paren' and token.value == '(':
+        if token['type'] == 'paren' and token['value'] == '(':
             current += 1
             token = tokens[current]
 
             node = {
                 'type': 'CallExpression',
-                'name': token.value,
+                'name': token['value'],
                 'params': [],
             }
 
             current += 1
             token = tokens[current]
 
-            while token.type != 'paren' or (token.type == 'paren' and token.value == ')'):
-                node.params.append(walk())
+            while token['type'] != 'paren' or (token['type'] == 'paren' and token['value'] != ')'):
+                node['params'].append(walk())
                 token = tokens[current]
 
             current += 1
             return node
         
-        raise Exception('TypeError: Unknown token : ' + token.type)
+        raise Exception('TypeError: Unknown token : ' + token['value'])
 
     ast = {
         'type': 'Program',
@@ -134,11 +136,11 @@ def parser(tokens):
 
     while current < len(tokens):
         print(ast['body'])
-        ast.body.append(walk())
+        ast['body'].append(walk())
 
     return ast
 
 # ---- test -----
-input = '''add(32)'''
+input = '''(add 4 2)'''
 print(tokens := tokenizer(input))
 print(parser(tokens))
