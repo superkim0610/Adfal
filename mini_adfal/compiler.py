@@ -142,5 +142,7 @@ def parser(tokens):
 
 # ---- test -----
 input = '''(add 4 2)'''
-print(tokens := tokenizer(input))
-print(parser(tokens))
+tokens = tokenizer(input)
+for token in tokens:
+    print(token)
+# print(parser(tokens))
