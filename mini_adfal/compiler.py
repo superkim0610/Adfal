@@ -45,6 +45,7 @@ def tokenizer(input):
     # initialization
     current = 0
     tokens = []
+    input += '\x1A' # add EOF char
     indent_num = 0 # for indent system
     first_of_line = True
 
@@ -77,12 +78,18 @@ def tokenizer(input):
         else:
             first_of_line = False
 
+        # check linebreak
         if char == '\n':
             add_token('delimiter', 'EOL')
             first_of_line = True
             current += 1
             continue
-        
+
+        # check EOF
+        if char == '\x1A':
+            add_token('delimiter', 'EOF')
+            break
+
         # check delimiter
         if is_delimiter(char):
             add_token('delimiter', char)
@@ -154,10 +161,12 @@ def tokenizer(input):
     
     return tokens
         
+# token -> AST
 def parser(tokens):
     pass
 
-input = '''
+def test():
+    input = '''
 def foo(a, b='hi'):
     print(a, b)
     return b + ' guys'
@@ -168,11 +177,14 @@ def boo():
 
 foo()
 if True:
-    boo()
-'''
+    boo()'''
 
-tokens = tokenizer(input)
-ast = parser(parser)
-print(tokens)
-for token in tokens:
-    print(token['type'], '\t', token['value'])
+    tokens = tokenizer(input)
+    ast = parser(parser)
+
+    print(tokens)
+    for token in tokens:
+        print(token['type'], '\t', token['value'])
+
+if __name__ == '__main__':
+    test()
