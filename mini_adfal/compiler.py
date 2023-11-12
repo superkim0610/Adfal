@@ -7,7 +7,6 @@ def tokenizer(input):
             'type': type,
             'value': value
         })
-        print(type,'\t',value)
 
     def is_lc_letter(char):
         return ord('a') <= ord(char) <= ord('z')
@@ -175,3 +174,5 @@ if True:
 tokens = tokenizer(input)
 ast = parser(parser)
 print(tokens)
+for token in tokens:
+    print(token['type'], '\t', token['value'])
