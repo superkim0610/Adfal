@@ -7,7 +7,7 @@ def tokenizer(input):
             'type': type,
             'value': value
         })
-        print(f'add_token("{type}", "{value}")')
+        print(type,'\t',value)
 
     def is_lc_letter(char):
         return ord('a') <= ord(char) <= ord('z')
@@ -37,7 +37,7 @@ def tokenizer(input):
         return value in operators
 
     def is_delimiter(char):
-        delimiters = ["(", ")", "[", "]", "{", "}", ",", ".", "\t"]
+        delimiters = ["(", ")", "[", "]", "{", "}", ",", ":", "."]
         return char in delimiters
 
     def is_whitespace(char):
@@ -46,13 +46,41 @@ def tokenizer(input):
     # initialization
     current = 0
     tokens = []
+    indent_num = 0 # for indent system
+    first_of_line = True
 
     # loop while input
     while current < len(input):
         char = input[current]
 
         # check whitespace
-        if is_whitespace(char):
+        if char == ' ':
+            space_count = 0
+
+            while char == ' ':
+                space_count += 1
+                current += 1
+                char = input[current]
+
+            if first_of_line:
+                if indent_num == 0:
+                    indent_num = space_count
+
+                # indent validation
+                if not space_count % indent_num == 0:
+                    raise Exception('Indent Error')
+                
+                for _ in range(space_count // indent_num):
+                    add_token('delimiter', 'indent')
+
+            # current += space_count
+            continue
+        else:
+            first_of_line = False
+
+        if char == '\n':
+            add_token('delimiter', 'EOL')
+            first_of_line = True
             current += 1
             continue
         
@@ -127,17 +155,21 @@ def tokenizer(input):
     
     return tokens
         
-        
-
 def parser(tokens):
     pass
 
 input = '''
-a = 2 * 2 / 4
-b = "hello world"
-c = input()
-print(a, b, "'hi' says taeyun")
-boo.foo('c', c)
+def foo(a, b='hi'):
+    print(a, b)
+    return b + ' guys'
+
+def boo():
+    for i in range(3):
+        print('hihi')
+
+foo()
+if True:
+    boo()
 '''
 
 tokens = tokenizer(input)
