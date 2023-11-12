@@ -137,6 +137,10 @@ def tokenizer(input):
                 add_token('operator', value)
                 current += len(value)
                 continue
+            elif is_operator_part(char):
+                add_token('operator', char)
+                current += 1
+                continue
         
         # check string literal
         if char == '"' or char == "'":
