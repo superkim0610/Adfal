@@ -5,7 +5,7 @@ id_start ::= "_" | lc_letter | uc_letter
 id_continue ::= "_" | lc_letter | uc_letter | digit
 
 
-keyword ::= "if" | "eles" | "while" | "for" | "continue" | "break" | "func" | "return" | "and" | "or" | "pass" | "var"
+keyword ::= "if" | "eles" | "while" | "for" | "continue" | "break" | "func" | "return" | "pass" | "var"
 
 
 literal ::= string_literal | number_literal
@@ -17,7 +17,7 @@ integer ::= digit (digit)*
 digit ::= "0"..."9"
 
 
-operator ::= "+" | "-" | "*" | "/" | "%" | "<" | ">" | "<=" | ">=" | "==" | "!=" | "="
+operator ::= "+" | "-" | "*" | "/" | "%" | "<" | ">" | "<=" | ">=" | "==" | "!=" | "=" | "&&" | "||"
 
 
 delimiter ::= "(" | ")" | "[" | "]" | "{" | "}" | "," | ":" | "." | indent | "\n" | "\x1A"
@@ -38,6 +38,7 @@ parameters ::= (identifier) ("," identifier)*
 
 expression ::= PrimaryExpression | BinaryExpression | AssignExpression | CallExpression
 PrimaryExpression ::= identifier | literal
+UnarayExpression ::= operator expression
 BinaryExpression ::= expression operator expression
 AssignExpression ::= identifier "=" expression
 CallExpression ::= id "(" arguments ")"

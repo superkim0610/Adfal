@@ -34,15 +34,15 @@ def tokenizer(input):
         return char == '_' or is_lc_letter(char) or is_uc_letter(char) or is_digit(char)
     
     def is_keyword(value):
-        keywords = ["if", "eles", "while", "for", "continue", "break", "func", "return", "and", "or", "pass"]
+        keywords = ["if", "eles", "while", "for", "continue", "break", "func", "return", "and", "or", "pass", "var"]
         return value in keywords
 
     def is_operator_part(char):
-        operator_parts = ["+", "-", "*", "/", "%", "<", ">", "!", "="]
+        operator_parts = ["+", "-", "*", "/", "%", "<", ">", "!", "=", "&", "|"]
         return char in operator_parts
 
     def is_operator(value):
-        operators = ["+", "-", "*", "/", "%", "<", ">", "<=", ">=", "==", "!=", "="]
+        operators = ["+", "-", "*", "/", "%", "<", ">", "<=", ">=", "==", "!=", "=", "&&", "||"]
         return value in operators
 
     def is_delimiter(char):
@@ -202,13 +202,7 @@ def parser(tokens):
         nonlocal current
 
         token = line_tokens[current]
-        print(token)
-
-        # check EOL
-        if token['type'] == 'delimiter' and token['value'] == 'EOL':
-            if current + 1 < len(tokens):
-                current += 1
-            return walk()
+        print(token) # test
         
         # check string_literal
         if token['type'] == 'string_literal':
@@ -227,6 +221,15 @@ def parser(tokens):
                 'value': token['value'],
             }
             return node
+        
+        # check identifier
+        if token['type'] == 'identifier':
+            current += 1
+            node = {
+                'type': 'Identifier',
+                'name': token['value']
+            }
+            return node
 
         # check keyword
         if token['type'] == 'keyword':
@@ -238,18 +241,21 @@ def parser(tokens):
                     'init': '',
                 }
                 current += 1
-
+                token = line_tokens[current]
+                
                 while (token['type'] != 'operator') or (token['type'] == 'operator' and token['value'] != '='):
                     node['id'] = walk()
-                    token = tokens[current]
+                    current += 1
+                    token = line_tokens[current]
 
                 current += 1
 
-                while (token):
-                    pass
+                while current < len(line_tokens):
+                    node['init'] = walk()
+
+                print(node)
+                return node
             
-
-
             # check FuncDecl
 
             # check ReturnStmt
@@ -258,8 +264,52 @@ def parser(tokens):
 
             # check ForStmt
 
-        # check identifier
+        # check operator
+        if token['type'] == 'operator':
 
+            # 1st operator
+            # call function
+            # indexing ---- test
+            # reference ---- test
+
+            # 2nd operator
+            # + (unary)
+            # - (unary)
+
+            # 3rd operator
+            # * (binary)
+            # / (binary)
+            # % (binary)
+
+            # 4th operator
+            # + (binary)
+            # - (binary)
+
+            # 5th operator
+            # <
+            # >
+            # <=
+            # >=
+
+            # 6th operaotr
+            # ==
+            # !=
+
+            # 7th operator
+            # &&
+            # ||
+
+            # 8th operator
+            # = (assign)
+
+            # 9th operator
+            # , (comma)
+
+        # check delimiter
+
+        # --------------- test
+        # check identifier
+        
             # check PriamaryExpr
 
             # check BinaryExpr
@@ -271,7 +321,6 @@ def parser(tokens):
         # check operator
 
         # raise TypeError
-        print(token) # test
         raise Exception("TypeError: Unknown Token")
 
     current = 0
@@ -304,18 +353,31 @@ def test():
 #     boo()
 # '''
 
+#     input = """
+# var ahi 'hi' '"dds"' 33 
+# 00 'hello'
+
+# 'kk'
+#     '..??'
+#     010100 'dd'
+# """
+
     input = """
-09 'hi' '"dds"' 33 
+var a = 1 + 1
+'plz..'
 """
 
     tokens = tokenizer(input)
-    ast = parser(tokens)
 
-    # print(tokens)
+    # print tokens
     for data in tokens:
         for token in data['line_tokens']:
             print('\t'.join([str(data['line']), str(data['indent']), token['type'], token['value']]))
-    
+
+    ast = parser(tokens)
+
+    # print ast 
     print('\n',ast)
+
 if __name__ == '__main__':
     test()
