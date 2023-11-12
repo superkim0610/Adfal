@@ -161,9 +161,32 @@ def tokenizer(input):
     
     return tokens
         
+a = 1
 # token -> AST
 def parser(tokens):
-    pass
+
+    def walk():
+        nonlocal current
+
+        token = tokens[current]
+
+        # check string_literal
+
+        # check number_literal
+
+        # check keyword
+
+            # check if keyword
+
+            # check else keyword
+
+            # 
+
+        # check identifier
+
+        # check operator
+
+    current = 0
 
 def test():
     input = '''
