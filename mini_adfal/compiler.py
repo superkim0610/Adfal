@@ -165,31 +165,52 @@ a = 1
 # token -> AST
 def parser(tokens):
 
+    def is_statement(token_type):
+        pass
+
+    def is_expression(token_type):
+        pass
+
     def walk():
         nonlocal current
 
         token = tokens[current]
 
-        # check string_literal
+        # check literal
 
-        # check number_literal
+            # check string_literal
+
+            # check number_literal
 
         # check keyword
 
-            # check if keyword
+            # check VariableDecl
 
-            # check else keyword
+            # check FuncDecl
 
-            # 
+            # check ReturnStmt
+            
+            # check IfStmt
+
+            # check ForStmt
 
         # check identifier
+
+            # check PriamaryExpr
+
+            # check BinaryExpr
+
+            # check AssignExpr
+
+            # check CallExpr
 
         # check operator
 
     current = 0
 
 def test():
-    input = '''
+    input = \
+'''
 def foo(a, b='hi'):
     print(a, b)
     return b + ' guys'
@@ -200,7 +221,8 @@ def boo():
 
 foo()
 if True:
-    boo()'''
+    boo()
+'''
 
     tokens = tokenizer(input)
     ast = parser(parser)
