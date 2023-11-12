@@ -4,6 +4,16 @@ def tokenizer(input):
     def add_token(type, value):
         nonlocal tokens
         tokens.append({
+            # 'loc': {
+            #     'start': {
+            #         'line': 0,
+            #         'column': 0
+            #     },
+            #     'end': {
+            #         'line': 0,
+            #         'column': 0
+            #     }
+            # },
             'type': type,
             'value': value
         })
@@ -46,8 +56,14 @@ def tokenizer(input):
     current = 0
     tokens = []
     input += '\x1A' # add EOF char
-    indent_num = 0 # for indent system
+
+    # for indent system
+    indent_num = 0
     first_of_line = True
+
+    # for loc marking
+    line = 1
+    column = 0
 
     # loop while input
     while current < len(input):
@@ -80,14 +96,14 @@ def tokenizer(input):
 
         # check linebreak
         if char == '\n':
-            add_token('delimiter', 'EOL')
+            # add_token('delimiter', 'EOL')
             first_of_line = True
             current += 1
             continue
 
         # check EOF
         if char == '\x1A':
-            add_token('delimiter', 'EOF')
+            # add_token('delimiter', 'EOF')
             break
 
         # check delimiter
@@ -175,38 +191,64 @@ def parser(tokens):
         nonlocal current
 
         token = tokens[current]
+        node = {}
+        
+        # check string_literal
+        if token['type'] == 'string_literal':
+            current += 1
+            node = {
+                'type': 'Literal',
+                'value': token['value'],
+            }
+            return node
 
-        # check literal
-
-            # check string_literal
-
-            # check number_literal
+        # check number_literal
+        if token['type'] == 'number_literal':
+            current += 1
+            node = {
+                'type': 'Literal',
+                'value': token['value'],
+            }
+            return node
 
         # check keyword
 
-            # check VariableDecl
+        # check VariableDecl
 
-            # check FuncDecl
+        # check FuncDecl
 
-            # check ReturnStmt
-            
-            # check IfStmt
+        # check ReturnStmt
+        
+        # check IfStmt
 
-            # check ForStmt
+        # check ForStmt
 
         # check identifier
 
-            # check PriamaryExpr
+        # check PriamaryExpr
 
-            # check BinaryExpr
+        # check BinaryExpr
 
-            # check AssignExpr
+        # check AssignExpr
 
-            # check CallExpr
+        # check CallExpr
 
         # check operator
 
+        # raise TypeError
+        print(token) # test
+        raise Exception("TypeError: Unknown Token")
+
     current = 0
+    ast = {
+        'type': 'Program',
+        'body': [],
+    }
+
+    while current < len(tokens):
+        ast['body'].append(walk())
+
+    return ast
 
 def test():
     input = \
@@ -224,12 +266,17 @@ if True:
     boo()
 '''
 
+    input = """
+09 'hi' '"dds"' 33 
+"""
+
     tokens = tokenizer(input)
-    ast = parser(parser)
+    ast = parser(tokens)
 
     print(tokens)
     for token in tokens:
         print(token['type'], '\t', token['value'])
-
+    
+    print('\n',ast)
 if __name__ == '__main__':
     test()
