@@ -192,104 +192,158 @@ def tokenizer(input):
     
     return tokens
         
-a = 1
 # token -> AST
 def parser(tokens):
-
-    def is_statement(token_type):
-        pass
-
-    def Expression(tokens):
-        pass
-        # return SequenceExpression(tokens)
     
-    # def SequenceExpression(tokens):
-    #     for token in tokens:
-    #         if token
-
-    def AssignExpression(tokens):
-        root, remains = BinaryExpression(tokens)
-        if remains[0]['type'] == 'operator' and remains[0]['value'] in ('='):
-            op, remains = remains[0], remains[1:]
-            node = {
+    def Expression(tokens):
+        
+        current = 0
+        while current < len(tokens):
+            token = tokens[current]
+            if token['type'] == 'operator' and token['value'] in ('='):
+                node = {
                 'type': 'AssignExpression',
-                'op': op,
-                'left': root,
-                'right': BinaryExpression(remains),
-            }
-            return node
-        return BinaryExpression(tokens)
-
-
-    def BinaryExpression(tokens):
-        root, remains = UnaryExpression(tokens)
-        if remains[0]['type'] == 'operator' and remains[0]['value'] in ('+'):
-            op, remains = remains[0], remains[1:]
-            node = {
+                'op': token['value'],
+                'left': Expression(tokens[0:current]),
+                'right': Expression(tokens[current+1:]),
+                }
+                return node
+            current += 1
+            
+        current = len(tokens)-1    
+        while current >= 0:
+            token = tokens[current]
+            if token['type'] == 'operator' and token['value'] in ('>', '<', '>=', '<='):
+                node = {
                 'type': 'BinaryExpression',
-                'op': op,
-                'left': root,
-                'right': UnaryExpression(remains),
-            }
-            return node
-        return BinaryExpression(tokens)
-
-    def UnaryExpression(tokens):
-        if tokens[0]['type'] == 'operator' and tokens[0]['value'] in ('+'):
-            op, remains = tokens[0], tokens[1:]
-            node = {
+                'op': token['value'],
+                'left': Expression(tokens[0:current]),
+                'right': Expression(tokens[current+1:]),
+                }
+                return node
+            current -= 1
+            
+        current = len(tokens)-1
+        while current >= 0:
+            token = tokens[current]
+            if token['type'] == 'operator' and token['value'] in ('+', '-'):
+                # check UnaryExpr
+                if current == 0 or (current-1 >= 0 and tokens[current-1]['type'] == 'operator'):
+                    current -= 1
+                    continue
+                node = {
+                'type': 'BinaryExpression',
+                'op': token['value'],
+                'left': Expression(tokens[0:current]),
+                'right': Expression(tokens[current+1:]),
+                }
+                return node
+            current -= 1
+            
+        current = len(tokens)-1
+        while current >= 0:
+            token = tokens[current]
+            if token['type'] == 'operator' and token['value'] in ('*', '/', '%'):
+                node = {
+                'type': 'BinaryExpression',
+                'op': token['value'],
+                'left': Expression(tokens[0:current]),
+                'right': Expression(tokens[current+1:]),
+                }
+                return node
+            current -= 1
+            
+        current = 0
+        while current < len(tokens):
+            token = tokens[current]
+            if token['type'] == 'operator' and token['value'] in ('+', '-'):
+                node = {
                 'type': 'UnaryExpression',
-                'op': op,
-                'argument': PrimaryExpression(remains)
-            }
-            return node
-
-    def MemberExpression(tokens):
-        pass
-
-    def CallExpression(tokens):
-        pass
-
-    def PrimaryExpression(tokens):
-        if tokens[0]['type'] == 'identifier' or tokens[0]['type'] == 'number_literal':
-            node = {
-                'type': 'Litral',
-                'value': tokens[0]['value']
-            }
-            return node
-
-    def walk():
-        nonlocal current
-
-        token = line_tokens[current]
-        print(token) # ----test
+                'op': token['value'],
+                'argument': Expression(tokens[current+1:]),
+                }
+                return node
+            current += 1
         
-        # check string_literal
-        if token['type'] == 'string_literal':
+        start = None
+        end = None
+        current = 0
+        while current < len(tokens):
+            token = tokens[current]
+            # print(token)
+            if token['type'] == 'delimiter' and token['value'] == '(':
+                start = current
+                break
             current += 1
+        print(start)
+        if start != None:
+            current = len(tokens)-1
+            while current >= 0:
+                token = tokens[current]
+                print(token, 'hi')
+                if token['type'] == 'delimiter' and token['value'] == ')':
+                    end = current
+                    break
+                current -= 1
             node = {
-                'type': 'Literal',
-                'value': token['value'],
+            'type': 'CallExpression',
+            'callee': Expression(tokens[:start]),
+            'arguments': Expression(tokens[start+1:end]),
             }
-            return node
-
-        # check number_literal
-        if token['type'] == 'number_literal':
-            current += 1
-            node = {
-                'type': 'Literal',
-                'value': token['value'],
-            }
+            
+            print(start,end)
             return node
         
-        # check identifier
-        if token['type'] == 'identifier':
-            current += 1
+        if len(tokens) == 1 and (tokens[0]['type'] == 'number_literal' or tokens[0]['type'] == 'string_literal'):
+            node = {
+                'type': 'Literal',
+                'value': tokens[0]['value'],
+            }
+            return node
+            
+        if len(tokens) == 1 and tokens[0]['type'] == 'identifier':
             node = {
                 'type': 'Identifier',
-                'name': token['value']
+                'name': tokens[0]['value'],
             }
             return node
+        
+        raise Exception("TypeError: Unknown expression")
+
+
+    def walk():
+        # nonlocal current
+        current = 0
+
+        token = line_tokens[current]
+        # print(token) # ----test
+        
+        # # check string_literal
+        # if token['type'] == 'string_literal':
+        #     current += 1
+        #     node = {
+        #         'type': 'Literal',
+        #         'value': token['value'],
+        #     }
+        #     return node
+
+        # # check number_literal
+        # if token['type'] == 'number_literal':
+        #     current += 1
+        #     node = {
+        #         'type': 'Literal',
+        #         'value': token['value'],
+        #     }
+        #     return node
+        
+        # # check identifier
+        # if token['type'] == 'identifier':
+        #     current += 1
+        #     node = {
+        #         'type': 'Identifier',
+        #         'name': token['value']
+        #     }
+        #     return node
 
         # check keyword
         if token['type'] == 'keyword':
@@ -297,24 +351,33 @@ def parser(tokens):
             if token['value'] == 'var':
                 node = {
                     'type': 'VariableDeclaraion',
-                    'id': '',
-                    'init': '',
+                    'declarations': Expression(line_tokens[1:])
                 }
-                current += 1
-                token = line_tokens[current]
-                
-                while (token['type'] != 'operator') or (token['type'] == 'operator' and token['value'] != '='):
-                    node['id'] = walk()
-                    current += 1
-                    token = line_tokens[current]
-
-                current += 1
-
-                while current < len(line_tokens):
-                    node['init'] = walk()
-
-                print(node)
+                current = len(line_tokens)
                 return node
+            
+        return Expression(line_tokens)
+
+                
+                # lstart = None
+                # lend = None
+                # rstart = None
+                # rend = None
+                
+                # current += 1
+                # token = line_tokens[current]
+                # while not (token['type'] == 'operator' and token['value'] == '='):
+                #     token = line_tokens[current]
+                #     current += 1
+                
+
+                # current += 1
+
+                # while current < len(line_tokens):
+                #     node['init'] = walk()
+
+                # print(node)
+                # return node
             
             # check FuncDecl
 
@@ -324,82 +387,80 @@ def parser(tokens):
 
             # check ForStmt
 
-        # return expression(line_tokens)
+        # # check operator
+        # if token['type'] == 'operator':
 
-        # check operator
-        if token['type'] == 'operator':
+        #     # 1st operator
 
-            # 1st operator
+        #     # call function (CallExpr)
+        #     if token['value'] == '(':
+        #         if current-1 >= 0 and line_tokens[current-1]['type'] == 'identifier':
+        #             current -= 1
+        #             callee = walk()
 
-            # call function (CallExpr)
-            if token['value'] == '(':
-                if current-1 >= 0 and line_tokens[current-1]['type'] == 'identifier':
-                    current -= 1
-                    callee = walk()
+        #             current += 1
+        #             arguments = []
+        #             while not (line_tokens[current]['type'] == 'operator' and line_tokens[current]['value'] == ')'):
+        #                 walk_recursion = walk()
+        #                 arguments.append(walk())
 
-                    current += 1
-                    arguments = []
-                    while not (line_tokens[current]['type'] == 'operator' and line_tokens[current]['value'] == ')'):
-                        walk_recursion = walk()
-                        arguments.append(walk())
+        #             # node = {
+        #             #     'type': 'CallExpression',
+        #             #     'id': ,
+        #             #     'arguments': walk(),
+        #             # }
+        #     # indexing (MemberExpr) ---- test 
+        #     # reference (MemberExpr) ---- test
 
-                    # node = {
-                    #     'type': 'CallExpression',
-                    #     'id': ,
-                    #     'arguments': walk(),
-                    # }
-            # indexing (MemberExpr) ---- test 
-            # reference (MemberExpr) ---- test
+        #     # 2nd operator
+        #     # + (unary)
+        #     # - (unary)
 
-            # 2nd operator
-            # + (unary)
-            # - (unary)
+        #     # 3rd operator
+        #     # * (binary)
+        #     # / (binary)
+        #     # % (binary)
 
-            # 3rd operator
-            # * (binary)
-            # / (binary)
-            # % (binary)
+        #     # 4th operator
+        #     # + (binary)
+        #     # - (binary)
 
-            # 4th operator
-            # + (binary)
-            # - (binary)
+        #     # 5th operator
+        #     # <
+        #     # >
+        #     # <=
+        #     # >=
 
-            # 5th operator
-            # <
-            # >
-            # <=
-            # >=
+        #     # 6th operaotr
+        #     # ==
+        #     # !=
 
-            # 6th operaotr
-            # ==
-            # !=
+        #     # 7th operator
+        #     # &&
+        #     # ||
 
-            # 7th operator
-            # &&
-            # ||
+        #     # 8th operator
+        #     # = (assign)
 
-            # 8th operator
-            # = (assign)
+        #     # 9th operator
+        #     # , (comma)
 
-            # 9th operator
-            # , (comma)
+        # # check delimiter
 
-        # check delimiter
-
-        # --------------- test
-        # check identifier
+        # # --------------- test
+        # # check identifier
         
-            # check PriamaryExpr
+        #     # check PriamaryExpr
 
-            # check BinaryExpr
+        #     # check BinaryExpr
 
-            # check AssignExpr
+        #     # check AssignExpr
 
-            # check CallExpr
+        #     # check CallExpr
 
-        # check operator
+        # # check operator
 
-        # raise TypeError
+        # # raise TypeError
         raise Exception("TypeError: Unknown Token")
 
     current = 0
@@ -410,9 +471,12 @@ def parser(tokens):
 
     for data in tokens:
         line_tokens = data['line_tokens']
-        current = 0
-        while current < len(line_tokens):
-            ast['body'].append(walk())
+        # current = 0
+        # while current < len(line_tokens):
+        #     ast['body'].append(walk())
+        if len(line_tokens) == 0:
+            continue
+        ast['body'].append(walk())
 
     return ast
 
@@ -441,9 +505,14 @@ def test():
 #     010100 'dd'
 # """
 
+#     input = """
+# var a = 1 + 1 * 2 / 4 + 2 / 1
+# a = 0
+# print(a + 9 / 2)
+# 'plz..'
+# """
     input = """
-var a = 1 + 1
-'plz..'
+print(a+1)    
 """
 
     tokens = tokenizer(input)
