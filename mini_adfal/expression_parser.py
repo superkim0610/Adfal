@@ -70,6 +70,33 @@ def Expression(tokens):
             return node
         current += 1
     
+    start = None
+    end = None
+    current = 0
+    while current < len(tokens):
+        token = tokens[current]
+        print(token)
+        if token['type'] == 'delimiter' and token['value'] == '(':
+            start = current
+            break
+        current += 1
+    if start != None:
+        current = len(tokens)-1
+        while current >= 0:
+            token = tokens[current]
+            if token['type'] == 'delimiter' and token['value'] == ')':
+                end = current    
+                break
+            current -= 1
+        node = {
+        'type': 'CallExpression',
+        'callee': Expression(tokens[:start]),
+        'arguments': Expression(tokens[start+1:end]),
+        }
+        
+        print(start,end)
+        return node
+    
     if len(tokens) == 1 and (tokens[0]['type'] == 'number_literal' or tokens[0]['type'] == 'string_literal'):
         node = {
             'type': 'Literal',
@@ -136,5 +163,5 @@ def Expression(tokens):
 #         }
 #         return node
 
-print(tokens := compiler.tokenizer('a2 = -1 - +2 + -3')[0]['line_tokens'],'\n')
+print(tokens := compiler.tokenizer('a2 = f(3)')[0]['line_tokens'],'\n')
 print(Expression(tokens))
