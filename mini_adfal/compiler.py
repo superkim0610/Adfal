@@ -3,7 +3,7 @@ def tokenizer(input):
 
     def add_token(type, value):
         nonlocal tokens
-        tokens.append({
+        tokens[-1]['line_tokens'].append({
             # 'loc': {
             #     'start': {
             #         'line': 0,
@@ -54,7 +54,11 @@ def tokenizer(input):
 
     # initialization
     current = 0
-    tokens = []
+    tokens = [{
+        'line': 1,
+        'indent': 0,
+        'line_tokens': [],
+    }]
     input += '\x1A' # add EOF char
 
     # for indent system
@@ -86,8 +90,9 @@ def tokenizer(input):
                 if not space_count % indent_num == 0:
                     raise Exception('Indent Error')
                 
-                for _ in range(space_count // indent_num):
-                    add_token('delimiter', 'indent')
+                tokens[-1]['indent'] = space_count // indent_num
+                # for _ in range(space_count // indent_num):
+                #     add_token('delimiter', 'indent')
 
             # current += space_count
             continue
@@ -97,6 +102,12 @@ def tokenizer(input):
         # check linebreak
         if char == '\n':
             # add_token('delimiter', 'EOL')
+            tokens.append({
+                'line': len(tokens)+1,
+                'indent': 0,
+                'line_tokens': [],
+            })
+            
             first_of_line = True
             current += 1
             continue
@@ -190,8 +201,14 @@ def parser(tokens):
     def walk():
         nonlocal current
 
-        token = tokens[current]
-        node = {}
+        token = line_tokens[current]
+        print(token)
+
+        # check EOL
+        if token['type'] == 'delimiter' and token['value'] == 'EOL':
+            if current + 1 < len(tokens):
+                current += 1
+            return walk()
         
         # check string_literal
         if token['type'] == 'string_literal':
@@ -212,26 +229,44 @@ def parser(tokens):
             return node
 
         # check keyword
+        if token['type'] == 'keyword':
+            # check VariableDecl
+            if token['value'] == 'var':
+                node = {
+                    'type': 'VariableDeclaraion',
+                    'id': '',
+                    'init': '',
+                }
+                current += 1
 
-        # check VariableDecl
+                while (token['type'] != 'operator') or (token['type'] == 'operator' and token['value'] != '='):
+                    node['id'] = walk()
+                    token = tokens[current]
 
-        # check FuncDecl
+                current += 1
 
-        # check ReturnStmt
-        
-        # check IfStmt
+                while (token):
+                    pass
+            
 
-        # check ForStmt
+
+            # check FuncDecl
+
+            # check ReturnStmt
+            
+            # check IfStmt
+
+            # check ForStmt
 
         # check identifier
 
-        # check PriamaryExpr
+            # check PriamaryExpr
 
-        # check BinaryExpr
+            # check BinaryExpr
 
-        # check AssignExpr
+            # check AssignExpr
 
-        # check CallExpr
+            # check CallExpr
 
         # check operator
 
@@ -245,26 +280,29 @@ def parser(tokens):
         'body': [],
     }
 
-    while current < len(tokens):
-        ast['body'].append(walk())
+    for data in tokens:
+        line_tokens = data['line_tokens']
+        current = 0
+        while current < len(line_tokens):
+            ast['body'].append(walk())
 
     return ast
 
 def test():
-    input = \
-'''
-def foo(a, b='hi'):
-    print(a, b)
-    return b + ' guys'
+#     input = \
+# '''
+# def foo(a, b='hi'):
+#     print(a, b)
+#     return b + ' guys'
 
-def boo():
-    for i in range(3):
-        print('hihi')
+# def boo():
+#     for i in range(3):
+#         print('hihi')
 
-foo()
-if True:
-    boo()
-'''
+# foo()
+# if True:
+#     boo()
+# '''
 
     input = """
 09 'hi' '"dds"' 33 
@@ -273,9 +311,10 @@ if True:
     tokens = tokenizer(input)
     ast = parser(tokens)
 
-    print(tokens)
-    for token in tokens:
-        print(token['type'], '\t', token['value'])
+    # print(tokens)
+    for data in tokens:
+        for token in data['line_tokens']:
+            print('\t'.join([str(data['line']), str(data['indent']), token['type'], token['value']]))
     
     print('\n',ast)
 if __name__ == '__main__':
