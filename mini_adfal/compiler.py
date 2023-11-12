@@ -11,22 +11,25 @@ def tokenizer(input):
         return ord('0') <= ord(char) <= ord('9')
     
     def is_identifier(char):
+        nonlocal current
         if is_id_start(char):
             value = ''
             
             while is_id_continue(char):
                 value += char
                 current += 1
+                if not current < len(input):
+                    break
                 char = input[current]
             
             # check value is keyword
             if is_keyword(value):    
-                tokens.apppend({
+                tokens.append({
                     'type': 'keyword',
                     'value': value
                 })
             else:
-                tokens.apppend({
+                tokens.append({
                 'type': 'identifier',
                 'value': value
             })
@@ -83,6 +86,7 @@ def tokenizer(input):
         return False
 
     def is_operator(char):
+        nonlocal current
         operators = ["+", "-", "*", "/", "%", "<", ">", "<=", ">=", "==", "!="]
         value = ''
         next_char = input[current+1]
@@ -107,15 +111,20 @@ def tokenizer(input):
         char = input[current]
 
         # identifier
-        is_identifier(char)
-        is_literal(char)
-        is_operator(char)
-        is_delimiter(char)
+        if is_identifier(char):
+            pass
+        elif is_literal(char):
+            pass
+        elif is_operator(char):
+            pass
+        elif is_delimiter(char):
+            pass
         
 
 def parser(tokens):
     pass
 
-input = ''
+input = 'hi'
 tokens = tokenizer(input)
 ast = parser(parser)
+print(tokens)
